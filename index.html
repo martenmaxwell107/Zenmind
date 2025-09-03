@@ -1,20 +1,16 @@
-
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>ZenMind — AI Success Architecture Mirror</title>
-<meta name="theme-color" content="#0b1220">
-<link id="manifest-link" rel="manifest" href="">
 <style>
-  :root { --bg:#0b1220; --card:#121a2a; --ink:#e8eefc; --muted:#9fb3d9; --accent:#6ea8fe; --line:#25324a; --ok:#2c7a4b; --warn:#b08900; --err:#cc3d3d;}
+  :root { --bg:#0b1220; --card:#121a2a; --ink:#e8eefc; --muted:#9fb3d9; --accent:#6ea8fe; --line:#25324a; }
   *{box-sizing:border-box}
   body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;background:var(--bg);color:var(--ink)}
   .wrap{max-width:980px;margin:32px auto;padding:0 16px}
   header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
   h1{font-size:28px;margin:0}
-  h2{margin:0 0 8px}
   .badge{font-size:12px;color:var(--muted)}
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0}
   .row{display:flex;gap:12px;flex-wrap:wrap}
@@ -29,14 +25,11 @@
   .stack{display:flex;gap:8px;flex-wrap:wrap}
   .muted{color:var(--muted)}
   pre{white-space:pre-wrap;background:#0e1526;border:1px solid var(--line);padding:12px;border-radius:10px}
+  hr{border:none;border-top:1px solid var(--line);margin:16px 0}
   .pill{font-size:12px;padding:4px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
   .foot{font-size:12px;color:var(--muted)}
-  .kpis{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:10px}
-  .kpi{border:1px solid var(--line);border-radius:12px;padding:10px;background:#0f1628}
-  .kpi .label{font-size:12px;color:var(--muted)}
-  .kpi .value{font-size:20px;margin-top:4px}
-  canvas{width:100%;height:260px;background:#0e1526;border-radius:12px;border:1px solid var(--line)}
-  .legend{font-size:12px;color:var(--muted)}
+  .success{border-color:#2c7a4b}
+  .warn{border-color:#b08900}
 </style>
 </head>
 <body>
@@ -49,35 +42,12 @@
     <div class="stack">
       <span class="pill" id="mode-pill">Mode: Local (OpenRouter)</span>
       <span class="pill" id="store-pill">Storage: Browser</span>
-      <span class="pill" id="install-pill">Installable: <span id="install-status">Checking…</span></span>
     </div>
   </header>
 
-  <!-- NOTIFICATIONS / REMINDERS -->
+  <!-- SETTINGS -->
   <section class="card">
-    <h2>Notifications & Reminders (Android)</h2>
-    <p class="muted">Enable notifications, set reminder times, and (optional) enable OneSignal to receive push while the app is closed.</p>
-    <div class="row">
-      <div class="col"><label>Morning Reminder (HH:MM, 24h)</label><input id="time-morning" placeholder="08:00" /></div>
-      <div class="col"><label>Evening Reminder (HH:MM, 24h)</label><input id="time-evening" placeholder="20:00" /></div>
-    </div>
-    <div class="stack" style="margin-top:8px">
-      <button class="btn-accent" id="btn-enable-notifs">Enable Notifications</button>
-      <button class="btn-ghost" id="btn-save-times">Save Times</button>
-      <button class="btn-ghost" id="btn-test-notif">Test Notification</button>
-    </div>
-    <hr/>
-    <h3 style="margin:0 0 8px">Optional: Background Push (OneSignal)</h3>
-    <p class="muted">To receive reminders even when the app is closed, enable OneSignal:<br/>1) Create a free OneSignal Web Push app → copy the App ID.<br/>2) Paste below → “Enable OneSignal”.</p>
-    <div class="row">
-      <div class="col"><label>OneSignal App ID</label><input id="onesignal-appid" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" /></div>
-      <div class="col"><label>&nbsp;</label><button class="btn-accent" id="btn-enable-onesignal">Enable OneSignal</button></div>
-    </div>
-  </section>
-
-  <!-- SETTINGS (LLM + backend) -->
-  <section class="card">
-    <h2>Settings</h2>
+    <h2 style="margin-top:0">Settings</h2>
     <div class="row">
       <div class="col">
         <label>Mode</label>
@@ -92,290 +62,255 @@
       </div>
     </div>
     <div id="local-creds" class="row" style="margin-top:8px">
-      <div class="col"><label>OpenRouter API Key (Local mode)</label><input id="openrouter-key" placeholder="sk-..." /></div>
-      <div class="col"><label>OpenRouter Model</label><input id="openrouter-model" value="openrouter/auto" /></div>
+      <div class="col">
+        <label>OpenRouter API Key (Local mode)</label>
+        <input id="openrouter-key" placeholder="sk-..." />
+      </div>
+      <div class="col">
+        <label>OpenRouter Model</label>
+        <input id="openrouter-model" value="openrouter/auto" />
+      </div>
     </div>
     <div class="stack" style="margin-top:8px">
       <button class="btn-accent" id="save-settings">Save Settings</button>
       <button class="btn-ghost" id="clear-local">Clear Local Data</button>
-      <button class="btn-ghost" id="export-data">Export Data (JSON)</button>
-      <label class="btn-ghost" style="display:inline-block;cursor:pointer">Import Data
-        <input type="file" id="import-file" style="display:none" />
-      </label>
     </div>
-  </section>
-
-  <!-- DASHBOARD -->
-  <section class="card">
-    <h2>Dashboard Review</h2>
-    <div class="kpis" style="margin:10px 0 14px">
-      <div class="kpi"><div class="label">Total Entries</div><div class="value" id="kpi-total">—</div></div>
-      <div class="kpi"><div class="label">Days Active (Streak)</div><div class="value" id="kpi-streak">—</div></div>
-      <div class="kpi"><div class="label">Success Rate (14d)</div><div class="value" id="kpi-success">—</div></div>
-      <div class="kpi"><div class="label">Last Weekly Theme</div><div class="value" id="kpi-theme" style="font-size:14px;line-height:1.2">—</div></div>
-    </div>
-    <div class="row">
-      <div class="col">
-        <label>Success Rate Over Time</label>
-        <canvas id="chart-success"></canvas>
-        <div class="legend">Daily 1/0 from “Achieved?” (Evening) + 7-day moving average.</div>
-      </div>
-      <div class="col">
-        <label>Top Obstacles (last 30 entries)</label>
-        <canvas id="chart-obstacles"></canvas>
-        <div class="legend">Word frequency from “Primary obstacle” (Evening), stopwords removed.</div>
-      </div>
-    </div>
-    <div class="stack" style="margin-top:10px">
-      <button class="btn-accent" id="refresh-dash">Refresh Dashboard</button>
-      <button class="btn-ghost" id="clear-charts">Clear Charts</button>
-    </div>
+    <p class="foot" style="margin-top:8px">
+      <strong>Note:</strong> Local mode calls OpenRouter directly from the browser (fastest to start). Your key is stored in your browser’s localStorage.
+      For production, switch to <em>Backend</em> mode later and keep keys server-side.
+    </p>
   </section>
 
   <!-- MORNING -->
   <section class="card">
-    <h2>Morning Clarity</h2>
+    <h2 style="margin-top:0">Morning Clarity</h2>
     <div class="row">
-      <div class="col"><label>Primary Goal</label><input id="m-goal" /></div>
-      <div class="col"><label>Single Most Important Outcome</label><input id="m-outcome" /></div>
+      <div class="col">
+        <label>Primary Goal</label>
+        <input id="m-goal" />
+      </div>
+      <div class="col">
+        <label>Single Most Important Outcome</label>
+        <input id="m-outcome" />
+      </div>
     </div>
     <div class="row">
-      <div class="col"><label>Proactive Adjustment</label><input id="m-adjust" /></div>
-      <div class="col"><label>Success Definition</label><input id="m-success" /></div>
+      <div class="col">
+        <label>Proactive Adjustment</label>
+        <input id="m-adjust" />
+      </div>
+      <div class="col">
+        <label>Success Definition</label>
+        <input id="m-success" />
+      </div>
     </div>
-    <div class="stack" style="margin-top:8px"><button class="btn-accent" id="run-morning">Run Morning</button></div>
-    <div style="margin-top:12px"><label>Result</label><pre id="m-result"></pre></div>
+    <div class="stack" style="margin-top:8px">
+      <button class="btn-accent" id="run-morning">Run Morning</button>
+    </div>
+    <div style="margin-top:12px">
+      <label>Result</label>
+      <pre id="m-result"></pre>
+    </div>
   </section>
 
   <!-- EVENING -->
   <section class="card">
-    <h2>Evening Optimization</h2>
+    <h2 style="margin-top:0">Evening Optimization</h2>
     <div class="row">
-      <div class="col"><label>Success Metric</label><input id="e-metric" /></div>
-      <div class="col"><label>Achieved?</label><select id="e-achieved"><option value="no">No</option><option value="yes">Yes</option></select></div>
+      <div class="col">
+        <label>Success Metric</label>
+        <input id="e-metric" />
+      </div>
+      <div class="col">
+        <label>Achieved?</label>
+        <select id="e-achieved">
+          <option value="no">No</option>
+          <option value="yes">Yes</option>
+        </select>
+      </div>
     </div>
     <div class="row">
-      <div class="col"><label>Primary Obstacle</label><input id="e-obstacle" /></div>
-      <div class="col"><label>Adjustment for Tomorrow</label><input id="e-adjust" /></div>
+      <div class="col">
+        <label>Primary Obstacle</label>
+        <input id="e-obstacle" />
+      </div>
+      <div class="col">
+        <label>Adjustment for Tomorrow</label>
+        <input id="e-adjust" />
+      </div>
     </div>
-    <div class="row"><div class="col"><label>One Win</label><input id="e-win" /></div></div>
-    <div class="stack" style="margin-top:8px"><button class="btn-accent" id="run-evening">Run Evening</button></div>
-    <div style="margin-top:12px"><label>Result</label><pre id="e-result"></pre></div>
+    <div class="row">
+      <div class="col">
+        <label>One Win</label>
+        <input id="e-win" />
+      </div>
+    </div>
+    <div class="stack" style="margin-top:8px">
+      <button class="btn-accent" id="run-evening">Run Evening</button>
+    </div>
+    <div style="margin-top:12px">
+      <label>Result</label>
+      <pre id="e-result"></pre>
+    </div>
   </section>
 
   <!-- WEEKLY -->
   <section class="card">
-    <h2>Weekly Review</h2>
-    <div class="stack"><button class="btn-accent" id="run-weekly">Run Weekly Review</button></div>
-    <div style="margin-top:12px"><label>Summary</label><pre id="w-result"></pre></div>
+    <h2 style="margin-top:0">Weekly Review</h2>
+    <p class="muted">Synthesizes your last entries and suggests 1–2 high-impact adjustments.</p>
+    <div class="stack">
+      <button class="btn-accent" id="run-weekly">Run Weekly Review</button>
+      <button class="btn-ghost" id="export-data">Export Data (JSON)</button>
+      <label class="btn-ghost" style="display:inline-block;cursor:pointer">
+        Import Data <input type="file" id="import-file" style="display:none" />
+      </label>
+    </div>
+    <div style="margin-top:12px">
+      <label>Summary</label>
+      <pre id="w-result"></pre>
+    </div>
   </section>
 
   <section class="card">
-    <h3>Privacy & Key Safety</h3>
-    <p class="foot">• Local mode: your OpenRouter key is stored in this browser’s localStorage; requests go directly to OpenRouter.<br/>• Production: use Backend mode to keep keys server-side.</p>
+    <h3 style="margin-top:0">Privacy & Key Safety</h3>
+    <p class="foot">
+      • Local mode stores your API key in <em>this browser’s</em> localStorage and sends requests from the browser to OpenRouter.<br/>
+      • For production, switch to Backend mode and keep keys on the server. You can keep using this same frontend without changes.
+    </p>
   </section>
 
   <p class="foot">© ZenMind</p>
 </div>
 
-<!-- OPTIONAL OneSignal SDK will be dynamically loaded only if you enable it -->
-
 <script>
-/* ===========================
-   RUNTIME ICONS + MANIFEST
-   =========================== */
-function makeIconDataURL(size){
-  const c=document.createElement('canvas'); c.width=c.height=size;
-  const g=c.getContext('2d');
-  // Background gradient
-  const grd=g.createLinearGradient(0,0,size,size);
-  grd.addColorStop(0,'#203a72'); grd.addColorStop(1,'#0b1220');
-  g.fillStyle=grd; g.fillRect(0,0,size,size);
-  // Circle
-  g.beginPath(); g.arc(size/2,size/2,size*0.42,0,Math.PI*2); g.fillStyle='#6ea8fe'; g.fill();
-  // Letters "ZM"
-  g.fillStyle='#0b1220'; g.font=`${Math.floor(size*0.36)}px system-ui,Segoe UI,Roboto`; g.textAlign='center'; g.textBaseline='middle';
-  g.fillText('ZM', size/2, size/2+size*0.02);
-  return c.toDataURL('image/png');
-}
-
-(function setupManifest(){
-  const icon192 = makeIconDataURL(192);
-  const icon512 = makeIconDataURL(512);
-  const manifest = {
-    name: "ZenMind",
-    short_name: "ZenMind",
-    start_url: "/",
-    display: "standalone",
-    background_color: "#0b1220",
-    theme_color: "#0b1220",
-    icons: [
-      { src: icon192, sizes: "192x192", type: "image/png", purpose: "any maskable" },
-      { src: icon512, sizes: "512x512", type: "image/png", purpose: "any maskable" }
-    ]
-  };
-  const blob = new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'});
-  const url = URL.createObjectURL(blob);
-  document.getElementById('manifest-link').setAttribute('href', url);
-})();
-
-/* ===========================
-   SERVICE WORKER (BLOB)
-   =========================== */
-let deferredPrompt;
-const installStatusEl=document.getElementById('install-status');
-window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt=e; installStatusEl.textContent='Ready (Add to Home Screen)'; });
-window.addEventListener('appinstalled', ()=>{ installStatusEl.textContent='Installed'; });
-
-if('serviceWorker' in navigator){
-  const swCode = `
-    const CACHE='zenmind-v1';
-    self.addEventListener('install',e=>{self.skipWaiting()});
-    self.addEventListener('activate',e=>{self.clients.claim()});
-    self.addEventListener('fetch',e=>{
-      if(e.request.method!=='GET') return;
-      e.respondWith(
-        fetch(e.request).then(res=>{
-          const copy=res.clone();
-          caches.open(CACHE).then(c=>c.put(e.request,copy));
-          return res;
-        }).catch(()=>caches.match(e.request))
-      );
-    });
-    self.addEventListener('push',event=>{
-      let data={}; try{data=event.data.json()}catch(e){}
-      const title=data.title||'ZenMind';
-      const body=data.body||'Time to check in.';
-      const url=data.url||'/';
-      event.waitUntil(self.registration.showNotification(title,{body,icon:data.icon||undefined,badge:data.badge||undefined,data:{url}}));
-    });
-    self.addEventListener('notificationclick',event=>{
-      event.notification.close();
-      const url=(event.notification.data&&event.notification.data.url)||'/';
-      event.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(list=>{
-        for(const w of list){ if(w.url.includes(self.registration.scope)){ w.focus(); return; } }
-        return clients.openWindow(url);
-      }));
-    });
-  `;
-  const swBlob = new Blob([swCode], {type:'text/javascript'});
-  const swUrl = URL.createObjectURL(swBlob);
-  navigator.serviceWorker.register(swUrl);
-}
-
-/* ===========================
-   STORAGE
-   =========================== */
+/** ---------------------------
+ *  Minimal local persistence
+ * --------------------------*/
 const store = {
   get k(){ return JSON.parse(localStorage.getItem('zenmind')||'{}') },
   set k(v){ localStorage.setItem('zenmind', JSON.stringify(v)) },
   get(key, def){ return (this.k[key] ?? def) },
-  set(key, val){ const o=this.k; o[key]=val; this.k=o; },
+  set(key, val){ const o = this.k; o[key]=val; this.k=o; },
   pushEntry(entry){ const o=this.k; o.journal=o.journal||[]; o.journal.push(entry); this.k=o; },
   journal(){ return this.get('journal', []) }
 };
+
+/** ---------------------------
+ *  UI elements
+ * --------------------------*/
 const $ = sel => document.querySelector(sel);
+const modeSelect = $('#mode');
+const backendUrlCol = $('#backend-url-col');
+const localCreds = $('#local-creds');
+const backendUrlInput = $('#backend-url');
+const keyInput = $('#openrouter-key');
+const modelInput = $('#openrouter-model');
 
-/* ===========================
-   SETTINGS / INIT
-   =========================== */
-const modeSelect=$('#mode'), backendUrlCol=$('#backend-url-col'), localCreds=$('#local-creds');
-const backendUrlInput=$('#backend-url'), keyInput=$('#openrouter-key'), modelInput=$('#openrouter-model');
-const modePill=$('#mode-pill'), storePill=$('#store-pill');
+const modePill = $('#mode-pill');
+const storePill = $('#store-pill');
 
+const mGoal = $('#m-goal');
+const mOutcome = $('#m-outcome');
+const mAdjust = $('#m-adjust');
+const mSuccess = $('#m-success');
+const mRes = $('#m-result');
+
+const eMetric = $('#e-metric');
+const eAchieved = $('#e-achieved');
+const eObstacle = $('#e-obstacle');
+const eAdjust = $('#e-adjust');
+const eWin = $('#e-win');
+const eRes = $('#e-result');
+
+const wRes = $('#w-result');
+
+/** ---------------------------
+ *  Init from local settings
+ * --------------------------*/
 function initSettings(){
   modeSelect.value = store.get('mode','local');
   backendUrlInput.value = store.get('backendUrl','');
   keyInput.value = store.get('openrouterKey','');
   modelInput.value = store.get('openrouterModel','openrouter/auto');
-  $('#time-morning').value = store.get('timeMorning','08:00');
-  $('#time-evening').value = store.get('timeEvening','20:00');
-  $('#onesignal-appid').value = store.get('onesignalAppId','');
-  applyModeUI(); refreshPills();
+  applyModeUI();
+  refreshPills();
 }
-function applyModeUI(){ const useLocal=(modeSelect.value==='local'); backendUrlCol.style.display=useLocal?'none':'block'; localCreds.style.display=useLocal?'flex':'none'; }
-function refreshPills(){ modePill.textContent='Mode: '+(store.get('mode','local')==='local'?'Local (OpenRouter)':'Backend'); storePill.textContent='Storage: Browser'; }
+function applyModeUI(){
+  const useLocal = (modeSelect.value === 'local');
+  backendUrlCol.style.display = useLocal ? 'none' : 'block';
+  localCreds.style.display = useLocal ? 'flex' : 'none';
+}
+function refreshPills(){
+  modePill.textContent = 'Mode: ' + (store.get('mode','local')==='local' ? 'Local (OpenRouter)' : 'Backend');
+  storePill.textContent = 'Storage: Browser';
+}
 initSettings();
 
 modeSelect.addEventListener('change', applyModeUI);
-$('#save-settings').addEventListener('click', ()=>{ store.set('mode', modeSelect.value); store.set('backendUrl', backendUrlInput.value.trim()); store.set('openrouterKey', keyInput.value.trim()); store.set('openrouterModel', modelInput.value.trim()||'openrouter/auto'); refreshPills(); alert('Settings saved.'); });
-$('#clear-local').addEventListener('click', ()=>{ if(confirm('Clear all local ZenMind data?')){ localStorage.removeItem('zenmind'); initSettings(); alert('Local data cleared.'); location.reload(); }});
-$('#export-data').addEventListener('click', ()=>{ const b=new Blob([JSON.stringify(store.k,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=\`zenmind_export_\${Date.now()}.json\`; a.click(); });
-$('#import-file').addEventListener('change', async (e)=>{ const f=e.target.files?.[0]; if(!f) return; const t=await f.text(); try{ const obj=JSON.parse(t); localStorage.setItem('zenmind', JSON.stringify(obj)); initSettings(); alert('Import complete.'); location.reload(); }catch(err){ alert('Import failed: '+err.message); }});
-
-/* ===========================
-   NOTIFICATIONS & REMINDERS
-   =========================== */
-async function requestNotificationPermission(){
-  if (!('Notification' in window)) throw new Error('Notifications not supported.');
-  const perm = await Notification.requestPermission();
-  if(perm!=='granted') throw new Error('Permission not granted.');
-  return perm;
-}
-async function showLocalNotification(title, body){
-  const reg = await navigator.serviceWorker.getRegistration();
-  if(reg) return reg.showNotification(title, { body });
-  return new Notification(title, { body });
-}
-function hhmmToMsToday(hhmm){
-  const [h,m] = (hhmm||'').split(':').map(n=>parseInt(n||'0',10));
-  const now = new Date();
-  const t = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h||0, m||0, 0, 0);
-  let ms = t - now; if(ms<0) ms += 86400000; return ms;
-}
-let timers=[]; function clearTimers(){ timers.forEach(id=>clearTimeout(id)); timers=[]; }
-function scheduleLocalReminders(){
-  clearTimers();
-  const tm=store.get('timeMorning','08:00'), te=store.get('timeEvening','20:00');
-  timers.push(setTimeout(function tick(){ showLocalNotification('ZenMind — Morning Clarity','Tap to set today’s single most important outcome.'); timers.push(setTimeout(tick,86400000)); }, hhmmToMsToday(tm)));
-  timers.push(setTimeout(function tick2(){ showLocalNotification('ZenMind — Evening Optimization','Tap to review your metric and set one tweak for tomorrow.'); timers.push(setTimeout(tick2,86400000)); }, hhmmToMsToday(te)));
-}
-$('#btn-enable-notifs').addEventListener('click', async ()=>{ try{ await requestNotificationPermission(); alert('Notifications enabled.'); }catch(e){ alert('Notifications error: '+e.message); }});
-$('#btn-save-times').addEventListener('click', ()=>{ store.set('timeMorning',$('#time-morning').value||'08:00'); store.set('timeEvening',$('#time-evening').value||'20:00'); scheduleLocalReminders(); alert('Times saved; local reminders scheduled (app must be open).'); });
-$('#btn-test-notif').addEventListener('click', ()=> showLocalNotification('ZenMind — Test','This is a test notification.'));
-
-let oneSignalEnabled=false;
-async function enableOneSignal(){
-  const appId = ($('#onesignal-appid').value||'').trim();
-  if(!appId) return alert('Add your OneSignal App ID first.');
-  if(!window.OneSignal){
-    const s=document.createElement('script'); s.src='https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js'; s.defer=true; document.head.appendChild(s);
-    await new Promise(res=> s.onload=res);
+$('#save-settings').addEventListener('click', ()=>{
+  store.set('mode', modeSelect.value);
+  store.set('backendUrl', backendUrlInput.value.trim());
+  store.set('openrouterKey', keyInput.value.trim());
+  store.set('openrouterModel', modelInput.value.trim()||'openrouter/auto');
+  refreshPills();
+  alert('Settings saved.');
+});
+$('#clear-local').addEventListener('click', ()=>{
+  if(confirm('Clear all local ZenMind data?')){
+    localStorage.removeItem('zenmind');
+    initSettings();
+    mRes.textContent = '';
+    eRes.textContent = '';
+    wRes.textContent = '';
+    alert('Local data cleared.');
   }
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  window.OneSignalDeferred.push(async function(OneSignal){
-    await OneSignal.init({ appId });
-    await OneSignal.Notifications.requestPermission();
-    oneSignalEnabled=true; store.set('onesignalAppId', appId);
-    alert('OneSignal enabled. Configure recurring push reminders in your OneSignal dashboard (works when the app is closed).');
-  });
-}
-$('#btn-enable-onesignal').addEventListener('click', enableOneSignal);
+});
 
-/* ===========================
-   LLM HELPERS
-   =========================== */
+/** ---------------------------
+ *  LLM call helpers
+ * --------------------------*/
 async function callLocalLLM(system, user){
+  // OpenRouter (client-side). Expects key & model from Settings.
   const key = store.get('openrouterKey','').trim();
   const model = store.get('openrouterModel','openrouter/auto').trim();
-  if(!key) throw new Error('Missing OpenRouter key in Settings.');
-  const headers = { 'Content-Type':'application/json', 'Authorization':'Bearer '+key, 'HTTP-Referer': location.origin, 'X-Title':'ZenMind' };
-  const body = { model, messages:[{role:'system',content:system},{role:'user',content:user}], temperature:0.5 };
-  const r = await fetch('https://openrouter.ai/api/v1/chat/completions',{ method:'POST', headers, body:JSON.stringify(body) });
-  if(!r.ok) throw new Error('OpenRouter error: '+r.status);
-  const js = await r.json(); return js.choices?.[0]?.message?.content || JSON.stringify(js);
+  if(!key){ throw new Error('Missing OpenRouter key in Settings.') }
+  const headers = {
+    'Content-Type':'application/json',
+    'Authorization': 'Bearer ' + key,
+    'HTTP-Referer': location.origin,
+    'X-Title': 'ZenMind'
+  };
+  const body = {
+    model,
+    messages: [
+      { role:'system', content: system },
+      { role:'user', content: user }
+    ],
+    temperature: 0.5
+  };
+  const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method:'POST', headers, body: JSON.stringify(body)
+  });
+  if(!r.ok) throw new Error('OpenRouter error: ' + r.status);
+  const js = await r.json();
+  return js.choices?.[0]?.message?.content || JSON.stringify(js);
 }
+
 async function callBackend(path, payload){
   const base = store.get('backendUrl','').trim();
   if(!base) throw new Error('Missing Backend URL in Settings.');
-  const r = await fetch(base+path,{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
-  if(!r.ok) throw new Error('Backend error: '+r.status);
+  const r = await fetch(base + path, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(payload)
+  });
+  if(!r.ok) throw new Error('Backend error: ' + r.status);
   return r.json();
 }
 
-/* ===========================
-   PROMPTS
-   =========================== */
+/** ---------------------------
+ *  Prompts used
+ * --------------------------*/
 const P23 = `As my AI thinking partner familiar with my Execution DNA and obstacles, please help me start my day with clarity. Ask me these four questions:
 1) Based on my primary goal of "{{goal}}" and my Execution DNA profile, what is the single most important outcome I need to achieve today?
 2) What potential obstacles (internal or external) might interfere with achieving this outcome today, considering my known patterns?
@@ -388,6 +323,7 @@ User Answers:
 - Adjustment: {{adjust}}
 - Success: {{success}}
 `;
+
 const P24 = `As my AI thinking partner, please help me reflect on today and optimize for tomorrow. Analyze these:
 - Success metric: {{metric}}
 - Achieved: {{achieved}}
@@ -396,6 +332,7 @@ const P24 = `As my AI thinking partner, please help me reflect on today and opti
 - One win: {{win}}
 
 Now reflect succinctly, identify one recurring pattern, and propose one specific improvement for tomorrow aligned with my Execution DNA.`;
+
 const P25 = `Weekly Pattern Recognition:
 Synthesize the entries below into:
 1) 2–3 recurring obstacles or challenges
@@ -407,131 +344,120 @@ Synthesize the entries below into:
 Entries:
 `;
 
-/* ===========================
-   DASHBOARD / CHARTS
-   =========================== */
-function toDateKey(ts){ const d=new Date(ts); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,'0')+"-"+String(d.getDate()).padStart(2,'0'); }
-function movingAvg(arr, n=7){ const out=[]; for(let i=0;i<arr.length;i++){ const a=Math.max(0,i-n+1), slice=arr.slice(a,i+1); out.push(slice.reduce((s,x)=>s+x,0)/slice.length);} return out; }
-const STOPWORDS=new Set(("a,an,and,are,as,at,be,by,for,from,has,have,had,he,she,they,the,of,or,to,too,in,on,that,this,with,was,were,will,just,not,no,me,my,our,we,you,its,it,is,if,so,but,than,then,there,here,over,under,into,about,because,when,while,what,how,why,where,which,who,whom,did,do,does,done,can,could,should,would,up,down,out").split(","));
-function tokenize(t){ return (t||"").toLowerCase().replace(/[^a-z0-9\s]/g," ").split(/\s+/).filter(w=>w && !STOPWORDS.has(w) && w.length>2); }
-
-function drawLineChart(canvas, labels, series, avgSeries){
-  const ctx=canvas.getContext('2d'); const W=canvas.width=canvas.clientWidth*devicePixelRatio; const H=canvas.height=canvas.clientHeight*devicePixelRatio; const pad=40*devicePixelRatio;
-  const xs=i=> pad+(W-2*pad)*(i/(labels.length-1||1)); const ys=v=> H-pad-(H-2*pad)*(v/1);
-  ctx.clearRect(0,0,W,H);
-  ctx.strokeStyle='#25324a'; ctx.lineWidth=1*devicePixelRatio;
-  ctx.beginPath(); ctx.moveTo(pad,H-pad); ctx.lineTo(W-pad,H-pad); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(pad,pad); ctx.lineTo(pad,H-pad); ctx.stroke();
-  ctx.fillStyle='#9fb3d9'; ctx.font=`${12*devicePixelRatio}px system-ui`; [0,0.5,1].forEach(v=>{const y=ys(v); ctx.strokeStyle='#1b2740'; ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(W-pad,y); ctx.stroke(); ctx.fillText(String(v), 8*devicePixelRatio, y-4*devicePixelRatio);});
-  ctx.strokeStyle='#6ea8fe'; ctx.lineWidth=2*devicePixelRatio; ctx.beginPath(); series.forEach((v,i)=>{ const x=xs(i), y=ys(v); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);}); ctx.stroke();
-  ctx.strokeStyle='#9fb3d9'; ctx.lineWidth=1.5*devicePixelRatio; ctx.setLineDash([6*devicePixelRatio,6*devicePixelRatio]);
-  ctx.beginPath(); avgSeries.forEach((v,i)=>{ const x=xs(i), y=ys(v); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);}); ctx.stroke(); ctx.setLineDash([]);
-}
-function drawBarChart(canvas, labels, values){
-  const ctx=canvas.getContext('2d'); const W=canvas.width=canvas.clientWidth*devicePixelRatio; const H=canvas.height=canvas.clientHeight*devicePixelRatio; const pad=40*devicePixelRatio;
-  const maxV=Math.max(1,...values); const slot=(W-2*pad)/(labels.length||1); const barW=slot*0.7;
-  ctx.clearRect(0,0,W,H);
-  ctx.strokeStyle='#25324a'; ctx.lineWidth=1*devicePixelRatio; ctx.beginPath(); ctx.moveTo(pad,H-pad); ctx.lineTo(W-pad,H-pad); ctx.stroke(); ctx.beginPath(); ctx.moveTo(pad,pad); ctx.lineTo(pad,H-pad); ctx.stroke();
-  labels.forEach((lab,i)=>{ const x=pad+slot*i+(slot-barW)/2; const h=(H-2*pad)*((values[i]||0)/maxV); ctx.fillStyle='#6ea8fe'; ctx.fillRect(x,H-pad-h,barW,h); });
-  ctx.fillStyle='#9fb3d9'; ctx.font=`${12*devicePixelRatio}px system-ui`; const steps=Math.min(5,maxV); for(let s=0;s<=steps;s++){ const v=Math.round(maxV*s/steps); const y=H-pad-(H-2*pad)*(v/maxV); ctx.fillText(String(v),8*devicePixelRatio,y-4*devicePixelRatio);}
-  ctx.save(); ctx.fillStyle='#9fb3d9'; ctx.textAlign='center'; labels.forEach((lab,i)=>{ const x=pad+slot*i+slot/2; ctx.fillText(lab, x, H-pad+16*devicePixelRatio);}); ctx.restore();
-}
-
-function computeDashboard(){
-  const entries=store.journal(); const total=entries.length;
-  // streak
-  const days=[...new Set(entries.map(e=>toDateKey(e.ts)))].sort(); let streak=0;
-  if(days.length){ let cur=new Date(); cur.setHours(0,0,0,0); let i=days.length-1;
-    while(i>=0){ const d=new Date(days[i]); d.setHours(0,0,0,0);
-      if(d.getTime()===cur.getTime()){ streak++; cur.setDate(cur.getDate()-1); i--; }
-      else if(d.getTime()===(new Date(cur.getTime()-86400000)).getTime()){ cur.setDate(cur.getDate()-1); }
-      else break;
-    }
-  }
-  // success series
-  const evenings=entries.filter(e=>e.type==='evening'); const byDate={};
-  evenings.forEach(e=>{ const k=toDateKey(e.ts); (byDate[k]=byDate[k]||[]).push(e.input?.achieved?1:0); });
-  const labels=Object.keys(byDate).sort();
-  const daily=labels.map(k=>{ const a=byDate[k]; return a.reduce((s,x)=>s+x,0)/a.length;});
-  const avg=movingAvg(daily,7);
-  const last14=labels.slice(-14); let succ14='—';
-  if(last14.length){ const vals=last14.map(k=>byDate[k].reduce((s,x)=>s+x,0)/byDate[k].length); const pct=Math.round(100*(vals.reduce((s,x)=>s+x,0)/vals.length)); succ14=pct+'%'; }
-  // obstacles
-  const recentEvenings=evenings.slice(-30); const wordCounts={};
-  const STOP=STOPWORDS; recentEvenings.forEach(e=>{ (e.input?.primary_obstacle||'').toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).forEach(w=>{ if(w && !STOP.has(w) && w.length>2) wordCounts[w]=(wordCounts[w]||0)+1; }); });
-  const top=Object.entries(wordCounts).sort((a,b)=>b[1]-a[1]).slice(0,10); const obsLabels=top.map(x=>x[0]); const obsValues=top.map(x=>x[1]);
-  // theme
-  const lastWeekly=entries.filter(e=>e.type==='weekly').slice(-1)[0]; let theme='—';
-  if(lastWeekly?.analysis){ const first=(String(lastWeekly.analysis).split('\n').map(s=>s.trim()).find(Boolean)||''); theme=first.length>44?first.slice(0,44)+'…':first; }
-  return { total, streak, labels, daily, avg, succ14, obsLabels, obsValues, theme };
-}
-
-const kpiTotal=$('#kpi-total'), kpiStreak=$('#kpi-streak'), kpiSuccess=$('#kpi-success'), kpiTheme=$('#kpi-theme');
-const successCanvas=$('#chart-success'), obstaclesCanvas=$('#chart-obstacles');
-function refreshDashboard(){ const d=computeDashboard(); kpiTotal.textContent=d.total||'0'; kpiStreak.textContent=d.streak||'0'; kpiSuccess.textContent=d.succ14||'—'; kpiTheme.textContent=d.theme||'—'; drawLineChart(successCanvas,d.labels,d.daily,d.avg); drawBarChart(obstaclesCanvas,d.obsLabels,d.obsValues); }
-function clearCharts(){ drawLineChart(successCanvas,[],[],[]); drawBarChart(obstaclesCanvas,[],[]); }
-
-/* ===========================
-   ACTIONS
-   =========================== */
+/** ---------------------------
+ *  Actions: Morning / Evening / Weekly
+ * --------------------------*/
 function stamp(){ return new Date().toISOString() }
-const mGoal=$('#m-goal'), mOutcome=$('#m-outcome'), mAdjust=$('#m-adjust'), mSuccess=$('#m-success'), mRes=$('#m-result');
-const eMetric=$('#e-metric'), eAchieved=$('#e-achieved'), eObstacle=$('#e-obstacle'), eAdjust=$('#e-adjust'), eWin=$('#e-win'), eRes=$('#e-result');
-const wRes=$('#w-result');
 
-async function runMorning(){
-  const payload={goal:mGoal.value.trim(), single_outcome:mOutcome.value.trim(), proactive_adjustment:mAdjust.value.trim(), success_definition:mSuccess.value.trim()};
-  const mode=store.get('mode','local');
+$('#run-morning').addEventListener('click', async ()=>{
+  const payload = {
+    goal: mGoal.value.trim(),
+    single_outcome: mOutcome.value.trim(),
+    proactive_adjustment: mAdjust.value.trim(),
+    success_definition: mSuccess.value.trim()
+  };
+  const mode = store.get('mode','local');
+
   try{
     let analysis;
     if(mode==='backend'){
-      const r=await fetch(store.get('backendUrl','')+'/ingest/morning',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); analysis=(await r.json()).analysis;
+      const resp = await callBackend('/ingest/morning', payload);
+      analysis = resp.analysis || JSON.stringify(resp);
     } else {
-      const sys="You are the user's AI Mirror. Be concise, practical, and aligned with their Execution DNA.";
-      const user=P23.replace('{{goal}}',payload.goal||'').replace('{{outcome}}',payload.single_outcome||'').replace('{{adjust}}',payload.proactive_adjustment||'').replace('{{success}}',payload.success_definition||'');
-      analysis=await callLocalLLM(sys,user);
+      const sys = "You are the user's AI Mirror. Be concise, practical, and aligned with their Execution DNA.";
+      const user = P23
+        .replace('{{goal}}', payload.goal||'')
+        .replace('{{outcome}}', payload.single_outcome||'')
+        .replace('{{adjust}}', payload.proactive_adjustment||'')
+        .replace('{{success}}', payload.success_definition||'');
+      analysis = await callLocalLLM(sys, user);
     }
-    mRes.textContent=analysis||''; store.pushEntry({ts:stamp(), type:'morning', input:payload, analysis});
-  }catch(e){ mRes.textContent='Error: '+e.message; }
-}
+    mRes.textContent = analysis;
+    store.pushEntry({ts: stamp(), type:'morning', input: payload, analysis});
+  }catch(e){
+    mRes.textContent = 'Error: ' + e.message;
+  }
+});
 
-async function runEvening(){
-  const payload={success_metric:eMetric.value.trim(), achieved:(eAchieved.value==='yes'), primary_obstacle:eObstacle.value.trim(), adjustment_for_tomorrow:eAdjust.value.trim(), one_win:eWin.value.trim()};
-  const mode=store.get('mode','local');
+$('#run-evening').addEventListener('click', async ()=>{
+  const payload = {
+    success_metric: eMetric.value.trim(),
+    achieved: (eAchieved.value==='yes'),
+    primary_obstacle: eObstacle.value.trim(),
+    adjustment_for_tomorrow: eAdjust.value.trim(),
+    one_win: eWin.value.trim()
+  };
+  const mode = store.get('mode','local');
+
   try{
     let analysis;
     if(mode==='backend'){
-      const r=await fetch(store.get('backendUrl','')+'/ingest/evening',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); analysis=(await r.json()).analysis;
+      const resp = await callBackend('/ingest/evening', payload);
+      analysis = resp.analysis || JSON.stringify(resp);
     } else {
-      const sys="You are the user's AI Mirror. Reflect the day, then suggest one specific improvement.";
-      const user=P24.replace('{{metric}}',payload.success_metric||'').replace('{{achieved}}',payload.achieved?'Yes':'No').replace('{{obstacle}}',payload.primary_obstacle||'').replace('{{adjust}}',payload.adjustment_for_tomorrow||'').replace('{{win}}',payload.one_win||'');
-      analysis=await callLocalLLM(sys,user);
+      const sys = "You are the user's AI Mirror. Reflect the day, then suggest one specific improvement.";
+      const user = P24
+        .replace('{{metric}}', payload.success_metric||'')
+        .replace('{{achieved}}', payload.achieved ? 'Yes' : 'No')
+        .replace('{{obstacle}}', payload.primary_obstacle||'')
+        .replace('{{adjust}}', payload.adjustment_for_tomorrow||'')
+        .replace('{{win}}', payload.one_win||'');
+      analysis = await callLocalLLM(sys, user);
     }
-    eRes.textContent=analysis||''; store.pushEntry({ts:stamp(), type:'evening', input:payload, analysis});
-  }catch(e){ eRes.textContent='Error: '+e.message; }
-}
+    eRes.textContent = analysis;
+    store.pushEntry({ts: stamp(), type:'evening', input: payload, analysis});
+  }catch(e){
+    eRes.textContent = 'Error: ' + e.message;
+  }
+});
 
-async function runWeekly(){
-  const entries=store.journal(); const last=entries.slice(-200);
-  const text=last.map(e=>`${e.ts} [${e.type}]\n${e.analysis||JSON.stringify(e.input)}`).join('\n\n');
+$('#run-weekly').addEventListener('click', async ()=>{
+  const entries = store.journal();
+  const last7 = entries.slice(-200) // simple slice
+  const text = last7.map(e => `${e.ts} [${e.type}]\n${e.analysis || JSON.stringify(e.input)}`).join('\n\n');
+  const mode = store.get('mode','local');
+
   try{
-    const sys="You are an AI Mirror. Identify patterns, strengths, obstacles, and adjustments.";
-    const summary=await callLocalLLM(sys, P25+text);
-    wRes.textContent=summary||''; store.pushEntry({ts:stamp(), type:'weekly', input:{}, analysis:summary}); refreshDashboard();
-  }catch(e){ wRes.textContent='Error: '+e.message; }
-}
+    let summary;
+    if(mode==='backend'){
+      // Backend has /weekly/review GET in scaffold; here we do local version for single-file app
+      const sys = "You are an AI Mirror. Identify patterns, strengths, obstacles, and adjustments.";
+      summary = await callLocalLLM(sys, P25 + text);
+    } else {
+      const sys = "You are an AI Mirror. Identify patterns, strengths, obstacles, and adjustments.";
+      summary = await callLocalLLM(sys, P25 + text);
+    }
+    wRes.textContent = summary;
+    store.pushEntry({ts: stamp(), type:'weekly', input:{}, analysis: summary});
+  }catch(e){
+    wRes.textContent = 'Error: ' + e.message;
+  }
+});
 
-$('#run-morning').addEventListener('click', runMorning);
-$('#run-evening').addEventListener('click', runEvening);
-$('#run-weekly').addEventListener('click', runWeekly);
-$('#refresh-dash').addEventListener('click', refreshDashboard);
-$('#clear-charts').addEventListener('click', clearCharts);
-
-/* ===========================
-   BOOT
-   =========================== */
-refreshDashboard();
-scheduleLocalReminders();
+/** ---------------------------
+ *  Export / Import
+ * --------------------------*/
+$('#export-data').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(store.k,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `zenmind_export_${Date.now()}.json`;
+  a.click();
+});
+$('#import-file').addEventListener('change', async (e)=>{
+  const f = e.target.files?.[0];
+  if(!f) return;
+  const text = await f.text();
+  try{
+    const obj = JSON.parse(text);
+    localStorage.setItem('zenmind', JSON.stringify(obj));
+    initSettings();
+    alert('Import complete.');
+  }catch(err){
+    alert('Import failed: ' + err.message);
+  }
+});
 </script>
 </body>
 </html>
+
