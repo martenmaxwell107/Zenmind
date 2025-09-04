@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0b1220">
 <link id="manifest-link" rel="manifest" href="">
 <style>
-  :root { --bg:#0b1220; --card:#121a2a; --ink:#e8eefc; --muted:#9fb3d9; --accent:#6ea8fe; --line:#25324a; --ok:#2c7a4b; --warn:#b08900; --err:#cc3d3d;}
+  :root { --bg:#0b1220; --card:#121a2a; --ink:#e8eefc; --muted:#9fb3d3; --accent:#6ea8fe; --line:#25324a; --ok:#2c7a4b; --warn:#b08900; --err:#cc3d3d;}
   *{box-sizing:border-box}
   body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;background:var(--bg);color:var(--ink)}
   .wrap{max-width:980px;margin:32px auto;padding:0 16px}
@@ -36,7 +36,6 @@
   .kpi .value{font-size:20px;margin-top:4px}
   canvas{width:100%;height:260px;background:#0e1526;border-radius:12px;border:1px solid var(--line)}
   .legend{font-size:12px;color:var(--muted)}
-
   /* mic dictation button */
   .mic-btn{border:1px solid var(--line); background:#0e1526; font-size:12px; padding:6px 10px; border-radius:999px;}
   .mic-btn.recording{background:#3a1f1f; border-color:#cc3d3d;}
@@ -53,14 +52,14 @@
     <div class="stack">
       <span class="pill" id="mode-pill">Mode: Local (OpenRouter)</span>
       <span class="pill" id="store-pill">Storage: Browser</span>
-      <span class="pill" id="install-pill">Installable: <span id="install-status">Checking…</span></span>
+      <span class="pill">Installable: <span id="install-status">Checking…</span></span>
     </div>
   </header>
 
   <!-- NOTIFICATIONS / REMINDERS -->
   <section class="card">
     <h2>Notifications & Reminders (Android)</h2>
-    <p class="muted">Enable notifications, set reminder times, and (optional) enable OneSignal to get push while the app is closed.</p>
+    <p class="muted">Enable notifications, set reminder times, and optionally enable OneSignal to get push while the app is closed.</p>
     <div class="row">
       <div class="col"><label>Morning Reminder (HH:MM, 24h)</label><input id="time-morning" placeholder="08:00" /></div>
       <div class="col"><label>Evening Reminder (HH:MM, 24h)</label><input id="time-evening" placeholder="20:00" /></div>
@@ -217,13 +216,11 @@
 
   <section class="card">
     <h3>Privacy & Key Safety</h3>
-    <p class="foot">• This build embeds your OpenRouter key into the file for convenience. Avoid sharing this URL publicly. For public use, switch to Backend mode so keys stay server-side.</p>
+    <p class="foot">This build embeds your OpenRouter key into the file for convenience. Avoid sharing this URL publicly. For public use, switch to Backend mode so keys stay server-side.</p>
   </section>
 
   <p class="foot">© ZenMind</p>
 </div>
-
-<!-- OPTIONAL OneSignal SDK will load dynamically only if you enable it -->
 
 <script>
 /* ===========================
@@ -288,7 +285,7 @@ if('serviceWorker' in navigator){
       const title=data.title||'ZenMind';
       const body=data.body||'Time to check in.';
       const url=data.url||'/';
-      event.waitUntil(self.registration.showNotification(title,{body,icon:data.icon||undefined,badge:data.badge||undefined,data:{url}}));
+      event.waitUntil(self.registration.showNotification(title,{body,icon:data.icon||undefined,badge=data.badge||undefined,data:{url}}));
     });
     self.addEventListener('notificationclick',event=>{
       event.notification.close();
@@ -329,10 +326,8 @@ function initSettings(){
   const DEFAULT_KEY = "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";
   const DEFAULT_MODEL = "openrouter/auto";
 
-  // Ensure Local mode by default unless user changed it
   modeSelect.value = store.get('mode','local');
 
-  // Persist defaults on first run
   if(!store.get('openrouterKey','')) store.set('openrouterKey', DEFAULT_KEY);
   if(!store.get('openrouterModel','')) store.set('openrouterModel', DEFAULT_MODEL);
 
@@ -466,8 +461,6 @@ Entries:
 function toDateKey(ts){ const d=new Date(ts); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,'0')+"-"+String(d.getDate()).padStart(2,'0'); }
 function movingAvg(arr, n=7){ const out=[]; for(let i=0;i<arr.length;i++){ const a=Math.max(0,i-n+1), slice=arr.slice(a,i+1); out.push(slice.reduce((s,x)=>s+x,0)/slice.length);} return out; }
 const STOPWORDS=new Set(("a,an,and,are,as,at,be,by,for,from,has,have,had,he,she,they,the,of,or,to,too,in,on,that,this,with,was,were,will,just,not,no,me,my,our,we,you,its,it,is,if,so,but,than,then,there,here,over,under,into,about,because,when,while,what,how,why,where,which,who,whom,did,do,does,done,can,could,should,would,up,down,out").split(","));
-function tokenize(t){ return (t||"").toLowerCase().replace(/[^a-z0-9\s]/g," ").split(/\s+/).filter(w=>w && !STOPWORDS.has(w) && w.length>2); }
-
 function drawLineChart(canvas, labels, series, avgSeries){
   const ctx=canvas.getContext('2d'); const W=canvas.width=canvas.clientWidth*devicePixelRatio; const H=canvas.height=canvas.clientHeight*devicePixelRatio; const pad=40*devicePixelRatio;
   const xs=i=> pad+(W-2*pad)*(i/(labels.length-1||1)); const ys=v=> H-pad-(H-2*pad)*(v/1);
@@ -475,9 +468,9 @@ function drawLineChart(canvas, labels, series, avgSeries){
   ctx.strokeStyle='#25324a'; ctx.lineWidth=1*devicePixelRatio;
   ctx.beginPath(); ctx.moveTo(pad,H-pad); ctx.lineTo(W-pad,H-pad); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(pad,pad); ctx.lineTo(pad,H-pad); ctx.stroke();
-  ctx.fillStyle='#9fb3d9'; ctx.font=`${12*devicePixelRatio}px system-ui`; [0,0.5,1].forEach(v=>{const y=ys(v); ctx.strokeStyle='#1b2740'; ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(W-pad,y); ctx.stroke(); ctx.fillText(String(v), 8*devicePixelRatio, y-4*devicePixelRatio);});
+  ctx.fillStyle='#9fb3d3'; ctx.font=`${12*devicePixelRatio}px system-ui`; [0,0.5,1].forEach(v=>{const y=ys(v); ctx.strokeStyle='#1b2740'; ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(W-pad,y); ctx.stroke(); ctx.fillText(String(v), 8*devicePixelRatio, y-4*devicePixelRatio);});
   ctx.strokeStyle='#6ea8fe'; ctx.lineWidth=2*devicePixelRatio; ctx.beginPath(); series.forEach((v,i)=>{ const x=xs(i), y=ys(v); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);}); ctx.stroke();
-  ctx.strokeStyle='#9fb3d9'; ctx.lineWidth=1.5*devicePixelRatio; ctx.setLineDash([6*devicePixelRatio,6*devicePixelRatio]);
+  ctx.strokeStyle='#9fb3d3'; ctx.lineWidth=1.5*devicePixelRatio; ctx.setLineDash([6*devicePixelRatio,6*devicePixelRatio]);
   ctx.beginPath(); avgSeries.forEach((v,i)=>{ const x=xs(i), y=ys(v); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);}); ctx.stroke(); ctx.setLineDash([]);
 }
 function drawBarChart(canvas, labels, values){
@@ -487,12 +480,12 @@ function drawBarChart(canvas, labels, values){
   ctx.strokeStyle='#25324a'; ctx.lineWidth=1*devicePixelRatio; ctx.beginPath(); ctx.moveTo(pad,H-pad); ctx.lineTo(W-pad,H-pad); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(pad,pad); ctx.lineTo(pad,H-pad); ctx.stroke();
   labels.forEach((lab,i)=>{ const x=pad+slot*i+(slot-barW)/2; const h=(H-2*pad)*((values[i]||0)/maxV); ctx.fillStyle='#6ea8fe'; ctx.fillRect(x,H-pad-h,barW,h); });
-  ctx.fillStyle='#9fb3d9'; ctx.font=`${12*devicePixelRatio}px system-ui`; const steps=Math.min(5,maxV); for(let s=0;s<=steps;s++){ const v=Math.round(maxV*s/steps); const y=H-pad-(H-2*pad)*(v/maxV); ctx.fillText(String(v),8*devicePixelRatio,y-4*devicePixelRatio);}
-  ctx.save(); ctx.fillStyle='#9fb3d9'; ctx.textAlign='center'; labels.forEach((lab,i)=>{ const x=pad+slot*i+slot/2; ctx.fillText(lab, x, H-pad+16*devicePixelRatio);}); ctx.restore();
+  ctx.fillStyle='#9fb3d3'; ctx.font=`${12*devicePixelRatio}px system-ui`; const steps=Math.min(5,maxV); for(let s=0;s<=steps;s++){ const v=Math.round(maxV*s/steps); const y=H-pad-(H-2*pad)*(v/maxV); ctx.fillText(String(v),8*devicePixelRatio,y-4*devicePixelRatio);}
+  ctx.save(); ctx.fillStyle='#9fb3d3'; ctx.textAlign='center'; labels.forEach((lab,i)=>{ const x=pad+slot*i+slot/2; ctx.fillText(lab, x, H-pad+16*devicePixelRatio);}); ctx.restore();
 }
-
 function computeDashboard(){
   const entries=store.journal(); const total=entries.length;
+  const toDateKey=ts=>{ const d=new Date(ts); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,'0')+"-"+String(d.getDate()).padStart(2,'0'); };
   const days=[...new Set(entries.map(e=>toDateKey(e.ts)))].sort(); let streak=0;
   if(days.length){ let cur=new Date(); cur.setHours(0,0,0,0); let i=days.length-1;
     while(i>=0){ const d=new Date(days[i]); d.setHours(0,0,0,0);
@@ -509,13 +502,13 @@ function computeDashboard(){
   const last14=labels.slice(-14); let succ14='—';
   if(last14.length){ const vals=last14.map(k=>byDate[k].reduce((s,x)=>s+x,0)/byDate[k].length); const pct=Math.round(100*(vals.reduce((s,x)=>s+x,0)/vals.length)); succ14=pct+'%'; }
   const recentEvenings=evenings.slice(-30); const wordCounts={};
-  const STOP=STOPWORDS; recentEvenings.forEach(e=>{ (e.input?.primary_obstacle||'').toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).forEach(w=>{ if(w && !STOP.has(w) && w.length>2) wordCounts[w]=(wordCounts[w]||0)+1; }); });
+  const STOP=new Set(("a,an,and,are,as,at,be,by,for,from,has,have,had,he,she,they,the,of,or,to,too,in,on,that,this,with,was,were,will,just,not,no,me,my,our,we,you,its,it,is,if,so,but,than,then,there,here,over,under,into,about,because,when,while,what,how,why,where,which,who,whom,did,do,does,done,can,could,should,would,up,down,out").split(","));
+  recentEvenings.forEach(e=>{ (e.input?.primary_obstacle||'').toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).forEach(w=>{ if(w && !STOP.has(w) && w.length>2) wordCounts[w]=(wordCounts[w]||0)+1; }); });
   const top=Object.entries(wordCounts).sort((a,b)=>b[1]-a[1]).slice(0,10); const obsLabels=top.map(x=>x[0]); const obsValues=top.map(x=>x[1]);
   const lastWeekly=entries.filter(e=>e.type==='weekly').slice(-1)[0]; let theme='—';
   if(lastWeekly?.analysis){ const first=(String(lastWeekly.analysis).split('\n').map(s=>s.trim()).find(Boolean)||''); theme=first.length>44?first.slice(0,44)+'…':first; }
   return { total, streak, labels, daily, avg, succ14, obsLabels, obsValues, theme };
 }
-
 const kpiTotal=$('#kpi-total'), kpiStreak=$('#kpi-streak'), kpiSuccess=$('#kpi-success'), kpiTheme=$('#kpi-theme');
 const successCanvas=$('#chart-success'), obstaclesCanvas=$('#chart-obstacles');
 function refreshDashboard(){ const d=computeDashboard(); kpiTotal.textContent=d.total||'0'; kpiStreak.textContent=d.streak||'0'; kpiSuccess.textContent=d.succ14||'—'; kpiTheme.textContent=d.theme||'—'; drawLineChart(successCanvas,d.labels,d.daily,d.avg); drawBarChart(obstaclesCanvas,d.obsLabels,d.obsValues); }
@@ -544,7 +537,6 @@ async function runMorning(){
     mRes.textContent=analysis||''; store.pushEntry({ts:stamp(), type:'morning', input:payload, analysis});
   }catch(e){ mRes.textContent='Error: '+e.message; }
 }
-
 async function runEvening(){
   const payload={success_metric:eMetric.value.trim(), achieved:(eAchieved.value==='yes'), primary_obstacle:eObstacle.value.trim(), adjustment_for_tomorrow:eAdjust.value.trim(), one_win:eWin.value.trim()};
   const mode=store.get('mode','local');
@@ -560,7 +552,6 @@ async function runEvening(){
     eRes.textContent=analysis||''; store.pushEntry({ts:stamp(), type:'evening', input:payload, analysis});
   }catch(e){ eRes.textContent='Error: '+e.message; }
 }
-
 async function runWeekly(){
   const entries=store.journal(); const last=entries.slice(-200);
   const text=last.map(e=>`${e.ts} [${e.type}]\n${e.analysis||JSON.stringify(e.input)}`).join('\n\n');
@@ -570,7 +561,6 @@ async function runWeekly(){
     wRes.textContent=summary||''; store.pushEntry({ts:stamp(), type:'weekly', input:{}, analysis:summary}); refreshDashboard();
   }catch(e){ wRes.textContent='Error: '+e.message; }
 }
-
 $('#run-morning').addEventListener('click', runMorning);
 $('#run-evening').addEventListener('click', runEvening);
 $('#run-weekly').addEventListener('click', runWeekly);
@@ -717,7 +707,6 @@ async function vcHandleCommand(text){
     '#m-goal', '#m-outcome', '#m-adjust', '#m-success',
     '#e-metric', '#e-obstacle', '#e-adjust', '#e-win'
   ];
-  // Add mic buttons
   targets.forEach(sel=>{
     const el = document.querySelector(sel);
     if(!el) return;
@@ -783,6 +772,35 @@ async function vcHandleCommand(text){
 })();
 
 /* ===========================
+   AUTOFILL SCRUB PATCH
+   =========================== */
+(function(){
+  const IDS = ['#m-goal','#m-outcome','#m-adjust','#m-success',
+               '#e-metric','#e-obstacle','#e-adjust','#e-win'];
+  IDS.forEach(sel=>{
+    const el = document.querySelector(sel);
+    if(!el) return;
+    el.setAttribute('autocomplete','off');
+    el.setAttribute('autocorrect','off');
+    el.setAttribute('autocapitalize','sentences');
+    el.setAttribute('spellcheck','true');
+    el.name = sel.slice(1)+'_'+Math.random().toString(36).slice(2,8);
+    const scrub = v => v.replace(/\bharry\s+potter\b/gi,'').trim();
+    if(el.value) el.value = scrub(el.value);
+    el.addEventListener('focus', ()=>{ el.value = scrub(el.value||''); });
+    el.addEventListener('input', ()=>{ 
+      const cur = el.value||''; 
+      const clean = scrub(cur); 
+      if(clean!==cur){ 
+        const pos = el.selectionStart; 
+        el.value = clean; 
+        try{ el.setSelectionRange(pos-(cur.length-clean.length),pos-(cur.length-clean.length)); }catch(_){}
+      }
+    });
+  });
+})();
+
+/* ===========================
    BOOT
    =========================== */
 refreshDashboard();
@@ -790,6 +808,7 @@ scheduleLocalReminders();
 </script>
 </body>
 </html>
+
 
 
 
