@@ -217,7 +217,7 @@
 
   <section class="card">
     <h3>Privacy & Key Safety</h3>
-    <p class="foot">• Local mode: your OpenRouter key is stored in this browser’s localStorage; requests go directly to OpenRouter.<br/>• Production: use Backend mode to keep keys server-side.</p>
+    <p class="foot">• This build embeds your OpenRouter key into the file for convenience. Avoid sharing this URL publicly. For public use, switch to Backend mode so keys stay server-side.</p>
   </section>
 
   <p class="foot">© ZenMind</p>
@@ -288,7 +288,7 @@ if('serviceWorker' in navigator){
       const title=data.title||'ZenMind';
       const body=data.body||'Time to check in.';
       const url=data.url||'/';
-      event.waitUntil(self.registration.showNotification(title,{body,icon:data.icon||undefined,badge=data.badge||undefined,data:{url}}));
+      event.waitUntil(self.registration.showNotification(title,{body,icon:data.icon||undefined,badge:data.badge||undefined,data:{url}}));
     });
     self.addEventListener('notificationclick',event=>{
       event.notification.close();
@@ -325,13 +325,25 @@ const backendUrlInput=$('#backend-url'), keyInput=$('#openrouter-key'), modelInp
 const modePill=$('#mode-pill'), storePill=$('#store-pill');
 
 function initSettings(){
+  // --- Embedded defaults (YOUR KEY baked in) ---
+  const DEFAULT_KEY = "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";
+  const DEFAULT_MODEL = "openrouter/auto";
+
+  // Ensure Local mode by default unless user changed it
   modeSelect.value = store.get('mode','local');
+
+  // Persist defaults on first run
+  if(!store.get('openrouterKey','')) store.set('openrouterKey', DEFAULT_KEY);
+  if(!store.get('openrouterModel','')) store.set('openrouterModel', DEFAULT_MODEL);
+
   backendUrlInput.value = store.get('backendUrl','');
-  keyInput.value = store.get('openrouterKey','');
-  modelInput.value = store.get('openrouterModel','openrouter/auto');
+  keyInput.value = store.get('openrouterKey', DEFAULT_KEY);
+  modelInput.value = store.get('openrouterModel', DEFAULT_MODEL);
+
   $('#time-morning').value = store.get('timeMorning','08:00');
   $('#time-evening').value = store.get('timeEvening','20:00');
   $('#onesignal-appid').value = store.get('onesignalAppId','');
+
   applyModeUI(); refreshPills();
 }
 function applyModeUI(){ const useLocal=(modeSelect.value==='local'); backendUrlCol.style.display=useLocal?'none':'block'; localCreds.style.display=useLocal?'flex':'none'; }
@@ -778,5 +790,6 @@ scheduleLocalReminders();
 </script>
 </body>
 </html>
+
 
 
